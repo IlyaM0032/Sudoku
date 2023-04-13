@@ -2,7 +2,7 @@
 #include <set>
 using namespace std;
 
-
+void printSet(set <int> s);
 enum type {l, c, s};
 struct Cell{
 	void Print(){
@@ -14,25 +14,74 @@ struct Cell{
 	int line = -1;
 	int coll = -1;
 	int sq = -1;
+	set <int> peeks = {};
 };
 struct Group{
 	void Print(){
 		for (int i = 0; i<9; ++i){
-			cout << values[i]->value << " ";
+			cout << list[i]->value << " ";
 		}
 		cout << endl;
 	};
-	int id;
-	Cell* values[9];
+	Cell* list[9];
 };
 
 struct Game{
+	bool makePeeks(int n){
+		Cell* chek = cell(n);
+		if (chek->value != 0) return false;
+		if (chek->peeks.empty()) {
+			chek->peeks = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+		}
+
+		//set <int> avl_peeks = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+		Group g = this->group(l,chek->line);
+		
+
+		for (Cell* c : g.list){
+			chek->peeks.erase(c->value);
+		}
+		g = this->group(c, chek->coll);
+		
+		
+		for (Cell* c : g.list){
+			chek->peeks.erase(c->value);
+		}
+		
+		
+		for (Cell* c : g.list){
+			chek->peeks.erase(c->value);
+		}
+		
+		if (chek->peeks.size() == 1) {
+			chek->value = *(chek->peeks.begin());
+			return true;
+		}
+		return false;
+		
+	};
+	void print(){
+		for (Cell c : game){
+			cout << c.value << " ";
+			if (c.coll == 8) cout << endl;
+		}
+	};
+	bool filled(Cell* p){
+		for (Cell c : game){
+			if (c.value == 0){
+				*p = c;
+				return false;
+			}
+			return true;
+		}
+
+	}
 	void rw(int abs, int value){
 		game[abs].value = value;
 		game[abs].abs = abs;
 	};
-	Cell cell(int n){
-		return game[n];
+	Cell * cell(int n){
+		return &game[n];
 	}
 	Group group(type type, int n){
 		switch (type){
@@ -43,13 +92,20 @@ struct Game{
 		case 2:
 			return sqs[n];
 		};
-
+		return sqs[n];
 	};
 	Cell game[81];
 	Group lines[9];
 	Group colls[9];
 	Group sqs[9];
 };
+
+void printSet(set <int> s){
+	for (int i : s){
+		cout << i << " "s;
+	}
+	cout <<  endl;
+}
 
 
 int main()
@@ -73,7 +129,7 @@ int main()
 	freopen("output.txt", "w", stdout);
 #endif
 
-	const set<int>  list = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+	const int list[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 	Cell * lines[9][9];
 	Cell * colls[9][9];
 	Cell * sqs[9][9];
@@ -101,17 +157,37 @@ int main()
 			else  sq = 8;
 		}
 		g1.game[i].sq = sq;
-		g1.lines[l].values[c] = &g1.game[i];
-		g1.colls[c].values[l] = &g1.game[i];
-		g1.sqs[sq].values[(c % 3 + (l%3 * 3 ))] = &g1.game[i];
+		g1.lines[l].list[c] = &g1.game[i];
+		g1.colls[c].list[l] = &g1.game[i];
+		g1.sqs[sq].list[(c % 3 + (l%3 * 3 ))] = &g1.game[i];
 	};
 	
-	g1.cell(73).Print(); 		//Распечатать клетку
+	//g1.cell(73).Print(); 		//Распечатать клетку
 	//g1.rw(73, 99);			//Присвоить клетке 73 значение 99
-	g1.group(s, 6).Print();	//Распечатать 6 группу sq
+	//g1.group(s, 6).Print();	//Распечатать 6 группу sq
 	//lien = строка = l = 0 // collumn = столбец = c = 1
 	//square = квадрат = s = 2
+	bool protectG = true;
+	bool protect1 = false;
+	int protect = 0;
+	bool changed = false;
+	while(true){
+		for (int i; i<81; ++i){
+			if(g1.makePeeks(i)){
+				changed = true;
+			}
+		}
+		if (!changed){
+			break;
+		}
 
+		changed = false;
+		
+	}
+	//printSet(g1.cell(47)->peeks);
+	//g1.cell(47)->Print();
+	g1.print();
+	
 }
 // Мусор ⬇️⬇️⬇️
 // konsole -e "bash -c '/home/ilyam/Code/FSTcpp/main;read '"
