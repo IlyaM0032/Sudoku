@@ -1,5 +1,7 @@
 #include <iostream>
 #include <set>
+#include <vector>
+#include <map>
 using namespace std;
 
 void printSet(set <int> s);
@@ -17,6 +19,22 @@ struct Cell{
 	set <int> peeks = {};
 };
 struct Group{
+	set <int> getUniquePeaks(){
+		map <int, int> allPeeks = {{1,0}, {2,0}, {3,0}, {4,0}, {5,0}, {6,0}, {7,0}, {8,0}, {9,0}};	
+		for (Cell * c : list){
+			for (int i : c->peeks){
+				++allPeeks[i];
+			}
+		}
+		set <int> rt;
+		for (const auto& [n, count] : allPeeks){
+			if (count == 0){
+				rt.insert(n);
+			}
+		}
+		return rt;
+
+	}
 	void Print(){
 		for (int i = 0; i<9; ++i){
 			cout << list[i]->value << " ";
@@ -27,6 +45,44 @@ struct Group{
 };
 
 struct Game{
+	bool analyze_peek(int n){
+		bool rt = false;
+		Cell * cel = cell(n);
+		int li = cel->line;
+		int co = cel->coll;
+		int sq = cel->sq;
+		Group line = this->group(l, cel->line);
+		Group coll = this->group(c, cel->coll);
+		Group sqd = this->group(s, cel->sq);
+		set <int> unique = line.getUniquePeaks();
+		for (Cell* c : line.list){
+			for (int p : c->peeks){
+				if (unique.count(p)){
+					c->value = p;
+					rt = true;
+				}
+			}
+		}
+		unique = coll.getUniquePeaks();
+		for (Cell* c : coll.list){
+			for (int p : c->peeks){
+				if (unique.count(p)){
+					c->value = p;
+					rt = true;
+				}
+			}
+		}
+		unique = sqd.getUniquePeaks();
+		for (Cell* c : coll.list){
+			for (int p : c->peeks){
+				if (unique.count(p)){
+					c->value = p;
+					rt = true;
+				}
+			}
+		}
+		return rt;
+	}
 	bool makePeeks(int n){
 		Cell* chek = cell(n);
 		if (chek->value != 0) return false;
@@ -66,10 +122,10 @@ struct Game{
 			if (c.coll == 8) cout << endl;
 		}
 	};
-	bool filled(Cell* p){
+	bool filled(){
 		for (Cell c : game){
 			if (c.value == 0){
-				*p = c;
+				
 				return false;
 			}
 			return true;
@@ -98,6 +154,12 @@ struct Game{
 	Group lines[9];
 	Group colls[9];
 	Group sqs[9];
+};
+
+struct peeks{
+	peeks(Cell * c): values(c->peeks), cell(c){};
+	set<int> values;
+	Cell * cell;
 };
 
 void printSet(set <int> s){
@@ -167,22 +229,17 @@ int main()
 	//g1.group(s, 6).Print();	//Распечатать 6 группу sq
 	//lien = строка = l = 0 // collumn = столбец = c = 1
 	//square = квадрат = s = 2
-	bool protectG = true;
-	bool protect1 = false;
-	int protect = 0;
+
 	bool changed = false;
-	while(true){
+	for (int in = 0; in<100; ++in){
 		for (int i; i<81; ++i){
 			if(g1.makePeeks(i)){
 				changed = true;
 			}
 		}
-		if (!changed){
-			break;
+		for (int i; i<81; ++i){
+			g1.analyze_peek(i);
 		}
-
-		changed = false;
-		
 	}
 	//printSet(g1.cell(47)->peeks);
 	//g1.cell(47)->Print();
